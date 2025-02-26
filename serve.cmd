@@ -2,4 +2,4 @@
 
 call compile
 
-java -cp out Server.GameServer
+java -cp "lib/*;out" Server.GameServer

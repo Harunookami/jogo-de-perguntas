@@ -1,5 +1,6 @@
 package Server;
 
+import javax.json.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,6 +45,13 @@ class StaticFileHandler implements HttpHandler {
         exchange.getResponseBody().close();
     }
 
+    private void sendFile(HttpExchange exchange, File file) throws IOException {
+        exchange.sendResponseHeaders(200, file.length());
+        OutputStream os = exchange.getResponseBody();
+        Files.copy(file.toPath(), os);
+        os.close();
+    }
+
     private void send(HttpExchange exchange, int code, String content) throws IOException {
         this.send(exchange, code, content, "text/html");
     }
@@ -65,16 +73,10 @@ class StaticFileHandler implements HttpHandler {
 
         // checa se é arquivo ou diretorio
         if (!file.exists() || file.isDirectory()) {
-            String notFound = "404 Not Found";
-            exchange.sendResponseHeaders(404, notFound.length());
-            exchange.getResponseBody().write(notFound.getBytes());
-            exchange.getResponseBody().close();
+            send(exchange, 200, "404 Not Found");
             return;
         }
 
-        exchange.sendResponseHeaders(200, file.length());
-        OutputStream os = exchange.getResponseBody();
-        Files.copy(file.toPath(), os);
-        os.close();
+        sendFile(exchange, file);
     }
 }

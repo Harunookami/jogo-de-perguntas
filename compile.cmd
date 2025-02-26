@@ -4,4 +4,4 @@
 dir /s /b src\*.java > sources.txt
 
 @REM javac -encoding UTF-8 -d out src/JogoDePerguntas/*.java
-javac -d out @sources.txt
+javac -cp "lib/*" -d out @sources.txt
