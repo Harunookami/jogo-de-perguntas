@@ -30,14 +30,40 @@ class StaticFileHandler implements HttpHandler {
         this.publicDir = publicDir;
     }
 
+    /*
+     * Endpoints da API:
+     * /api/questao
+     * /api/checar-resposta
+     */
+
+    private void send(HttpExchange exchange, int code, String content, String contentType) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type",
+                (contentType != null && !contentType.isEmpty()) ? contentType : "text/html");
+        exchange.sendResponseHeaders(200, content.length());
+        exchange.getResponseBody().write(content.getBytes());
+        exchange.getResponseBody().close();
+    }
+
+    private void send(HttpExchange exchange, int code, String content) throws IOException {
+        this.send(exchange, code, content, "text/html");
+    }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String requestPath = exchange.getRequestURI().getPath();
         if (requestPath.equals("/")) {
             requestPath = "/index.html"; // padrão para index.html
         }
+        System.out.println("Request Path Atual: " + requestPath);
+
+        if (requestPath.equals("/api/questao")) {
+            send(exchange, 200, "{\"error\": false}", "application/json");
+            return;
+        }
 
         File file = new File(publicDir + requestPath);
+
+        // checa se é arquivo ou diretorio
         if (!file.exists() || file.isDirectory()) {
             String notFound = "404 Not Found";
             exchange.sendResponseHeaders(404, notFound.length());
